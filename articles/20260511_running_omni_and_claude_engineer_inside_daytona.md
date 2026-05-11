@@ -66,10 +66,12 @@ Claude Engineer uses Anthropic, and optionally E2B for code execution:
 
 ```bash
 ANTHROPIC_API_KEY="your-anthropic-key"
+ANTHROPIC_MODEL="claude-sonnet-4-20250514"
 E2B_API_KEY="your-e2b-key"
 ```
 
 Keep those values out of Git. The `.env.example` files are committed as templates; your real `.env` files stay local to the sandbox.
+The `ANTHROPIC_MODEL` setting matters because Anthropic model availability changes over time and can differ by account. The companion Claude Engineer PR makes that value configurable without editing source code.
 
 ## Add a Dev Container to Omni Engineer
 
@@ -275,8 +277,9 @@ from pathlib import Path
 
 env = Path(".env")
 current = env.read_text() if env.exists() else ""
-lines = [line for line in current.splitlines() if not line.startswith(("ANTHROPIC_API_KEY=", "E2B_API_KEY="))]
+lines = [line for line in current.splitlines() if not line.startswith(("ANTHROPIC_API_KEY=", "ANTHROPIC_MODEL=", "E2B_API_KEY="))]
 lines.append("ANTHROPIC_API_KEY=your-anthropic-key")
+lines.append("ANTHROPIC_MODEL=claude-sonnet-4-20250514")
 lines.append("E2B_API_KEY=your-e2b-key")
 env.write_text("\n".join(lines) + "\n")
 PY
@@ -344,6 +347,8 @@ daytona exec claude-engineer --cwd /home/daytona/claude-engineer -- test -f requ
 python -c "import os; print(os.getenv('OPENROUTER_API_KEY') is not None)"
 python -c "import os; print(os.getenv('ANTHROPIC_API_KEY') is not None)"
 ```
+
+If Anthropic returns `model not found`, set `ANTHROPIC_MODEL` in `.env` to a model that is available to your Anthropic account. `claude-sonnet-4-20250514` is a current stable default, but your account's `/v1/models` response is the source of truth.
 
 **Claude Engineer's web UI is not reachable.** Confirm Flask is running on port `5000`, then request a fresh preview URL:
 
